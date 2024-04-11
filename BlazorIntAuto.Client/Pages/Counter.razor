@@ -1,6 +1,7 @@
 ﻿@page "/counter"
 @attribute [Authorize]
 @rendermode InteractiveAuto
+@inject HttpClient Http
 
 <PageTitle>Counter</PageTitle>
 
@@ -11,12 +12,20 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<div>
+  <p>&nbsp;</p>
+  <button class="btn btn-primary" @onclick="CallInternalApi">Call internal API</button>
+  <button class="btn btn-primary" @onclick="CallExternalApi">Call external API</button>
+  <p>@ApiResponse</p>
+</div>
+
 @code {
     private int currentCount = 0;
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
     private string Username = "";
+    private string ApiResponse = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,5 +41,19 @@
     private void IncrementCount()
     {
         currentCount++;
+    }
+
+    private async Task CallInternalApi()
+    {
+        var data = await Http.GetFromJsonAsync<int[]>("api/internalData");
+
+        ApiResponse = $"This data comes from an internal API: {string.Join(",", data)}";
+    }
+
+    private async Task CallExternalApi()
+    {
+        var data = await Http.GetFromJsonAsync<int[]>("api/externalData");
+
+        ApiResponse = $"This data comes from an external API: {string.Join(",", data)}";
     }
 }
